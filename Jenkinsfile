@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/yourusername/recipe-sharing-app.git'
+                git 'https://github.com/Yogita07052004/casestudy.git'
             }
         }
         stage('Build Docker Image') {
