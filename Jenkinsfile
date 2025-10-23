@@ -8,21 +8,23 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t your_dockerhub_username/recipe-app:latest .'
+                bat 'docker build -t your_dockerhub_username/recipe-app:latest .'
             }
         }
         stage('Push to Docker Hub') {
             steps {
                 withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_TOKEN')]) {
-                    sh 'echo $DOCKER_TOKEN | docker login -u your_dockerhub_username --password-stdin'
-                    sh 'docker push your_dockerhub_username/recipe-app:latest'
+                    bat '''
+                    echo %DOCKER_TOKEN% | docker login -u your_dockerhub_username --password-stdin
+                    docker push your_dockerhub_username/recipe-app:latest
+                    '''
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
+                bat 'kubectl apply -f deployment.yaml'
+                bat 'kubectl apply -f service.yaml'
             }
         }
     }
