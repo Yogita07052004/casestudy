@@ -23,4 +23,4 @@ def view_recipe(id):
     return render_template('view_recipe.html', recipe=recipe)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000,debug=True)
