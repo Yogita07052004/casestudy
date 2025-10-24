@@ -28,7 +28,7 @@ pipeline {
                     bat """
                         echo Logging in to Docker Hub
                         docker logout
-                        echo %yogita@2004% | docker login -u %yogita1232% --password-stdin
+                        echo %yogita@2004% | docker login -u %yogita1232% --password-yogita@2004
                     """
                 }
             }
