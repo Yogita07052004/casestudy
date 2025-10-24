@@ -16,35 +16,31 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                }
+                bat "docker build -t %IMAGE_NAME%:%IMAGE_TAG% ."
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
-                script {
-                    sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    bat 'echo %PASS% | docker login -u %USER% --password-stdin'
                 }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                bat "docker push %IMAGE_NAME%:%IMAGE_TAG%"
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    sh """
-                    kubectl set image deployment/cs1232-deployment cs1232=${IMAGE_NAME}:${IMAGE_TAG} || \
-                    kubectl create deployment cs1232-deployment --image=${IMAGE_NAME}:${IMAGE_TAG}
-                    kubectl expose deployment cs1232-deployment --type=NodePort --port=5000 --target-port=5000 || true
-                    """
-                }
+                bat """
+                kubectl set image deployment/cs1232-deployment cs1232=%IMAGE_NAME%:%IMAGE_TAG% || ^
+                kubectl create deployment cs1232-deployment --image=%IMAGE_NAME%:%IMAGE_TAG%
+                kubectl expose deployment cs1232-deployment --type=NodePort --port=5000 --target-port=5000 || exit 0
+                """
             }
         }
     }
