@@ -26,9 +26,9 @@ pipeline {
             usernameVariable: 'yogita1232',
             passwordVariable: 'yogita@2004'
         )]) {
-            bat """
-            echo %DOCKERHUB_PASS% | docker login -u %DOCKERHUB_USER% --password-stdin
-            """
+            docker logout
+            docker login -u %yogita1232% -p %yogita@2004%
+
         }
     }
 }
