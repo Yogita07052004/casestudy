@@ -1,19 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: recipe-app
+  name: kubeapp-deployment
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
-      app: recipe
+      app: kubeapp
   template:
     metadata:
       labels:
-        app: recipe
+        app: kubeapp
     spec:
       containers:
-      - name: recipe-app
-        image: your_dockerhub_username/recipe-app:latest
+      - name: kubeapp
+        image: yogita1232/strength:latest
+
         ports:
+
         - containerPort: 5000
