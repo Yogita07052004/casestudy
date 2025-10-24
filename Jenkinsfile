@@ -1,58 +1,46 @@
-pipeline {
+pipeline{
     agent any
-
-    environment {
-        IMAGE_NAME = "yogita1232/cs1232:v1"
-    }
-
-    stages {
-        stage('Checkout SCM') {
-            steps {
-                git url: 'https://github.com/Yogita07052004/casestudy.git', branch: 'master'
+    stages{
+        stage ("Build Docker Image"){
+            steps{
+                echo "Build Docker Image"
+                bat "docker build -t kubeapp:v2 ."
             }
         }
-
-        stage('Build Docker Image') {
-            steps {
-                bat """
-                    docker build -t %IMAGE_NAME% .
-                """
+        stage ("Docker Login"){
+            steps{
+                bat "docker login -u yogita1232 -p yogita@2004"
             }
         }
-
-        stage('Login to Docker Hub') {
+        stage("push Docker Iamge to Docker Hub"){
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', 
-                                                  usernameVariable: 'yogita1232', 
-                                                  passwordVariable: 'yogita@2004')]) {
-                    bat """
-                        echo Logging in to Docker Hub
-                        docker logout
-                        echo %yogita@2004% | docker login -u %yogita1232% --password-yogita@2004
-                    """
-                }
+                echo "push Docker Image to docker hub"
+                bat "docker tag kubeapp:v2 yogita1232/strength:latest"
+                bat "docker push yogita1232/strength:latest"
+
+
             }
         }
-
-        stage('Push Docker Image') {
-            steps {
-                bat """
-                    docker push %IMAGE_NAME%
-                """
+        stage("Deploy to Kubernetes"){
+            steps{
+                bat "kubectl apply -f deployment.yaml --validate=false"
+                bat "kubectl apply -f service.yaml"
             }
         }
-
-        stage('Deploy to Kubernetes') {
+        stage('Restart Deployment') {
             steps {
-                echo "Deploy to Kubernetes logic here"
-                // Add your kubectl commands if needed
+                echo "Restarting Deployment to pick up new image..."
+                bat "kubectl rollout restart deployment/kubeapp-deployment"
             }
         }
     }
+    post{
+        success{
+            echo 'Pipeline completed scucessfull!'
 
-    post {
-        failure {
-            echo "Something went wrong. Check the logs."
+        }
+        failure{
+            echo "Pipeline failed.Please check the logs."
         }
     }
 }
