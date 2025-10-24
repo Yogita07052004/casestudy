@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
         IMAGE_NAME = "yogita1232/cs1232"
         IMAGE_TAG = "v1"
     }
@@ -22,8 +21,10 @@ pipeline {
 
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    bat 'echo %PASS% | docker login -u %USER% --password-stdin'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', 
+                                                 usernameVariable: 'DOCKERHUB_CREDENTIALS_USR', 
+                                                 passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW')]) {
+                    bat 'docker login -u %DOCKERHUB_CREDENTIALS_USR% -p %DOCKERHUB_CREDENTIALS_PSW%'
                 }
             }
         }
@@ -37,7 +38,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 bat """
-                kubectl set image deployment/cs1232-deployment cs1232=%IMAGE_NAME%:%IMAGE_TAG% || ^
+                kubectl set image deployment/cs1232-deployment cs1232=%IMAGE_NAME%:%IMAGE_TAG% || \
                 kubectl create deployment cs1232-deployment --image=%IMAGE_NAME%:%IMAGE_TAG%
                 kubectl expose deployment cs1232-deployment --type=NodePort --port=5000 --target-port=5000 || exit 0
                 """
